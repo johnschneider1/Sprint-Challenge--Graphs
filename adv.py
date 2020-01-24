@@ -25,10 +25,53 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
-# Fill this out with directions to walk
-# traversal_path = ['n', 'n']
-traversal_path = []
 
+def go_back(direction):
+    if direction is 'n':
+        return 's'
+    elif direction is 's':
+        return 'n'
+    elif direction is 'e':
+        return 'w'
+    elif direction is 'w':
+        return 'e'
+    return
+
+
+def maze_traversal():
+
+    traversal_path = []
+    visited = {}
+    reverse_path = []
+
+    visited[player.current_room.id] = player.current_room.get_exits()
+    # print("VISITED:", visited)
+    world_measure = len(room_graph) - 1
+
+    while len(visited) < world_measure:
+        if player.current_room.id not in visited:
+            visited[player.current_room.id] = player.current_room.get_exits()
+            # print("VISITED2:", visited)
+            # print("REVERSED:", reverse)
+            visited[player.current_room.id].remove(reverse_path[-1])
+        while len(visited[player.current_room.id]) == 0:
+            re_path = reverse_path.pop()
+            traversal_path.append(re_path)
+            player.travel(re_path)
+            # print("VISITED3:", visited)
+            # print("REVERSED2:", reverse)
+            print("TRAVEL:", traversal_path)
+
+        move = visited[player.current_room.id].pop(0)
+        traversal_path.append(move)
+        new_move = go_back(move)
+        reverse_path.append(new_move)
+        player.travel(move)
+
+    return traversal_path
+
+
+traversal_path = maze_traversal()
 
 # TRAVERSAL TEST
 visited_rooms = set()
@@ -45,20 +88,6 @@ if len(visited_rooms) == len(room_graph):
 else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
-
-
-#######
-# UNCOMMENT TO WALK AROUND
-#######
-player.current_room.print_room_description(player)
-while True:
-    cmds = input("-> ").lower().split(" ")
-    if cmds[0] in ["n", "s", "e", "w"]:
-        player.travel(cmds[0], True)
-    elif cmds[0] == "q":
-        break
-    else:
-        print("I did not understand that command.")
 
 
 # this is my first commit
